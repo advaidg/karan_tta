@@ -20,6 +20,7 @@ CONFIG = OrderedDict([
     ("w_strong_start", 48),
     ("w_type_change", 75),
     ("ambig_margin", 22),
+    ("break_known_on_lowsim", False),
     ("unknown_mode", "ContiguousRuns"),
 ])
 
@@ -53,18 +54,27 @@ TYPES["ClosingInstructions"] = t(
      "escrow closing instructions"],
     ["closing disclosure must be delivered by", "rate lock expiration date",
      "these closing instructions", "transaction wire amount", "escrow closing instructions"],
+    # any_page kept to CI-instruction-body terms only. The escrow-CI continuation
+    # pages (buyer/seller roles, HOA approval, legal-description) are matched by
+    # SPECIFIC section phrases — NOT by title-company letterhead words, which would
+    # also match unrelated title letters (post-closing, tax-proration) on the same
+    # letterhead and steal them into this document.
     ["closing instructions", "title insurance policy requirements", "document enclosures",
      "closing package", "contact closer", "closer phone number", "title contact",
      "disbursement date", "wire amount", "secondary contact", "title file",
-     "buyer and seller", "acknowledgment", "hoa dues", "seller s disclosure",
-     "old republic national title", "earnest money", "proration", "roles and acknowledgments",
-     "furnish and sign required documents", "limited indemnity", "buyer and seller roles",
-     "approval of sale", "agreement to furnish", "acknowledgment of review",
-     "legal description of subject property", "subject property",
-     "old republic national title insurance company", "parties and subject property",
-     "buyers", "sellers", "closing date"],
-    ["deed of trust", "wiring instructions - bank",
-     "american land title", "this form is a statement of final loan terms"])
+     # escrow Closing Instructions continuation-page anchors (this multi-page doc has
+     # numbered sections with different content per page and no repeated title):
+     "buyer and seller roles", "roles and acknowledgments", "approval of sale",
+     "agreement to furnish", "acknowledgment of review", "limited indemnity",
+     "hoa dues", "legal description of subject property", "furnish and sign required documents"],
+    # negatives: OTHER title-company letters that share the SAME letterhead but are
+    # separate documents (ground truth = Unknown). Their own DISTINCT titles push
+    # them down so they aren't pulled into Closing Instructions. NB: do NOT list
+    # "deed of trust" here — escrow closing instructions mention it in passing, and
+    # the penalty would wrongly drop a real CI page below the Unknown floor.
+    ["this form is a statement of final loan terms",
+     "post closing instructions", "tax proration", "wiring instructions",
+     "american land title", "settlement statement"])
 
 TYPES["DeedOfTrust"] = t(
     ["deed of trust", "security instrument"],

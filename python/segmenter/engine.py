@@ -177,12 +177,20 @@ class Segmenter:
         start_type_min = cfg.get("start_type_min", cfg["min_type_score"] * 1.5)
         confident_type = best_score >= start_type_min
         hard_page_cue = first_page_signature or reset or page_one or prev_terminal
-        # single-page types and over-cap are deterministic boundary signals (a
-        # one-page form, or a same-type page past its cap) — exempt them from the
-        # confident-type gate so short docs (e.g. an OCR-mangled Driver License)
-        # still start a new document.
+        # When the OPEN segment is Unknown we are actively looking for the next
+        # document, so a header TITLE (strong) is enough to start one — even a
+        # modestly-scored short doc like a 1-page escrow instruction. But when the
+        # open segment is a CONFIDENT KNOWN document, a mid-stream page that merely
+        # echoes another type's title in its body must NOT start a new doc; there we
+        # require a confident score or a hard page cue. This separates a real new
+        # document (title after an Unknown run) from a continuation page that
+        # happens to mention another type.
+        open_is_unknown = (seg_type is None) or (seg_type == "Unknown")
+        title_start_ok = strong and open_is_unknown
+        # single-page / over-cap are deterministic boundary signals (a one-page form,
+        # or a same-type page past its cap) — always allowed to start.
         if type_changed and not (confident_type or hard_page_cue
-                                 or single_page_type or over_cap):
+                                 or single_page_type or over_cap or title_start_ok):
             strong_new = False
 
         # type change is real evidence only when corroborated AND (confident type or
@@ -197,10 +205,21 @@ class Segmenter:
         # does not belong to it (e.g. a PUD/Condo Rider following a Deed of Trust:
         # shares the legal vocabulary but its rider-specific negatives push the
         # Deed-of-Trust score below zero) -> start a new (Unknown) document.
+        # A confident KNOWN document giving way to an Unknown page ends the doc.
+        # Two triggers, the second is config-gated:
+        #   * contradicts_open: the page scores NEGATIVE for the open type (its
+        #     negatives fired, e.g. a PUD/Condo Rider after a Deed of Trust) -> the
+        #     page clearly is not that type. Always a boundary.
+        #   * low similarity: config "break_known_on_lowsim" (default True). Useful
+        #     when distinct unknown docs follow a known doc, but it can over-split a
+        #     multi-page instructions doc whose pages differ a lot. Mortgage profiles
+        #     set this False (they rely on contradiction + titles instead).
         open_type_score = dec.type_scores.get(seg_type, 0.0) if seg_type else 0.0
         contradicts_open = dec.is_unknown and open_type_score < 0.0
+        break_on_lowsim = bool(cfg.get("break_known_on_lowsim", True))
         known_to_unknown = (seg_type is not None and seg_type != "Unknown"
-                            and dec.is_unknown and (low_sim or contradicts_open))
+                            and dec.is_unknown
+                            and (contradicts_open or (break_on_lowsim and low_sim)))
 
         # same-type new instance via page-1 signature (no page number needed)
         same_type_new_instance = same_type and not dec.is_unknown and first_page_signature

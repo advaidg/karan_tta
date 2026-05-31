@@ -35,16 +35,19 @@
 //      If "ProfilesJson" is empty/absent, the built-in 43-type set is used.
 //
 //  ---- OUTPUT VARIABLES (sp.OutputVariables) ----------------------------------
-//    "SplitPlan"    : human-readable plan, one segment per row separated by " ; ":
-//                     startPage|endPage|docType|confidence|OK_or_REVIEW|reason
-//                     (page numbers are 1-based here for readability.)
-//    "SplitIndexes" : comma-separated 0-based page indexes where a NEW document
-//                     begins (page 0 excluded). Feed these to
-//                     CaptureDocumentService.SplitDocumentAndClassify (its
-//                     SplitDocumentInfo.SplitIndex is 0-based).
-//    "SplitTypes"   : comma-separated doc type per segment, in order.
-//    "ReviewFlags"  : comma-separated "1"/"0" per segment (1 => route to review).
-//    "DocCount"     : number of segments found.
+//    "ResultJson"   : PRIMARY output — a single JSON string describing every
+//                     document. Shape:
+//                     {
+//                       "docCount": 24, "pageCount": 127,
+//                       "documents": [
+//                         { "index":1, "startPage":1, "endPage":1, "pageCount":1,
+//                           "type":"ClosingDisclosure", "confidence":0.92,
+//                           "needsReview":true, "splitIndex":0, "reason":"..." }, ...
+//                       ],
+//                       "splitIndexes": [6,11,12]   // 0-based, for SplitDocumentAndClassify
+//                     }
+//    "SplitIndexes" : (convenience) comma-separated 0-based start indexes.
+//    "DocCount"     : number of documents found.
 //
 //  Proven on mortgage-realistic data (docs/RESULTS.md): A,A split ~96%,
 //  boundary F1 ~93%, type accuracy ~91%, unknown leakage <1%.
@@ -193,6 +196,7 @@ namespace MortgageSegmenter
         public double WPagenumOne = 45.0, WReset = 50.0, WPrevTerminal = 25.0, WLowSim = 25.0;
         public double WContPagenum = 40.0, WContTitle = 18.0;
         public double SimLow = 0.24, StartThreshold = 44.0, StartLow = 25.0;
+        public bool BreakKnownOnLowSim = true;   // false in mortgage profile (contradiction-only)
         public string UnknownMode = "ContiguousRuns";   // or "MergeAll"
     }
 
@@ -217,7 +221,9 @@ namespace MortgageSegmenter
         public int HasPageNum; public int PageNumber; public int HasTotal; public int TotalPages;
         public List<string> Signals = new List<string>();
         public bool StrongInHeader; public bool FirstPageSig;
-        public double BestMinusSecond; public double BestScore; public List<string> NormTokens = new List<string>();
+        public double BestMinusSecond; public double BestScore;
+        public Dictionary<string, double> TypeScores = new Dictionary<string, double>();
+        public List<string> NormTokens = new List<string>();
         public int MaxPages;
     }
 
@@ -423,6 +429,7 @@ namespace MortgageSegmenter
             string bestType = null;
             double best = double.NegativeInfinity, second = double.NegativeInfinity;
             bool bestStrongHeader = false;
+            var typeScores = new Dictionary<string, double>();
             foreach (var t in _types)
             {
                 double s = 0; bool strongHeader = false;
@@ -433,6 +440,7 @@ namespace MortgageSegmenter
                 }
                 foreach (var kw in t.AnyPage) if (Ocr.Has(nf, kw)) s += cfg.WAny;
                 foreach (var kw in t.Negative) if (Ocr.Has(nf, kw)) s += cfg.WNegative;
+                typeScores[t.Name] = s;
                 if (s > best) { second = best; best = s; bestType = t.Name; bestStrongHeader = strongHeader; }
                 else if (s > second) second = s;
             }
@@ -467,6 +475,7 @@ namespace MortgageSegmenter
                 FirstPageSig = fpSig,
                 BestMinusSecond = best - second,
                 BestScore = best,
+                TypeScores = typeScores,
                 NormTokens = Ocr.Tokenize(nf),
                 MaxPages = maxPages,
             };
@@ -635,163 +644,9 @@ namespace MortgageSegmenter
                 }
                 catch { /* fall back to built-in on any parse error */ }
             }
-            return Default();
-        }
-
-        public static List<TypeProfile> Default()
-        {
-            var L = new List<TypeProfile>();
-            Add(L, "ClosingDisclosure", "closing disclosure",
-                "this form is a statement of final loan terms~closing information transaction information~date issued",
-                "closing disclosure~gtridcdns~closing cost details~loan information~transaction information~disbursement date~settlement agent~loan id~sale price~loan terms~projected payments~loan calculations~loan disclosures~calculating cash to close~total loan costs~origination charges~escrow account",
-                "deed of trust~promissory note~note addendum~cover sheet and manifest~mandatory closing instructions", 0);
-            Add(L, "DeedOfTrust", "deed of trust~security instrument~deed of trust security instrument",
-                "this deed of trust is made~recording requested by~definitions words used in multiple sections",
-                "borrower~lender~trustee~property~covenants~recording",
-                "closing disclosure~promissory note~appraisal", 0);
-            Add(L, "Note", "note~promissory note",
-                "borrower s promise to pay~in return for a loan i have received",
-                "promise to pay~principal~interest rate~maturity~borrower",
-                "addendum to note~deed of trust~first payment letter", 0);
-            Add(L, "AddendumToNote", "addendum to note~note addendum", "",
-                "addendum~promissory note~rider", "deed of trust~closing disclosure", 0);
-            Add(L, "CreditReport", "credit report~summary",
-                "merged credit report~repository equifax experian transunion",
-                "fico~credit score~tradelines~inquiries~equifax~experian~transunion",
-                "credit score disclosure~appraisal", 0);
-            Add(L, "CreditScoreDisclosure", "credit score disclosure", "",
-                "credit score~score range~key factors~scoring model", "credit report~appraisal", 1);
-            Add(L, "DUUnderwritingFindings", "du underwriting findings~du underwriting",
-                "recommendation approve eligible~casefile id",
-                "desktop underwriter~findings~recommendation~casefile",
-                "gus underwriting~loan product advisor", 0);
-            Add(L, "GUSUnderwritingFindings",
-                "gus underwriting findings report~gus underwriting findings~gus underwriting",
-                "gus recommendation accept~submission summary",
-                "gus~guaranteed underwriting system~findings", "du underwriting~loan product advisor", 0);
-            Add(L, "LoanProductAdvisorFeedback",
-                "loan product advisor feedback~loan product advisor full feedback certificate~lp findings",
-                "risk class accept~loan product advisor evaluation",
-                "loan product advisor~freddie mac~feedback certificate~lpa",
-                "du underwriting~gus underwriting", 0);
-            Add(L, "EscrowAccountDisclosure", "escrow account disclosure statement~escrow account disclosure",
-                "escrow account projection for the coming year~initial escrow statement",
-                "escrow~cushion~aggregate adjustment~disbursement", "closing disclosure~note", 0);
-            Add(L, "ClosingInstructions",
-                "mandatory closing instructions~closing instructions",
-                "closing disclosure must be delivered by~rate lock expiration date~these closing instructions are delivered to you~within 24 hours of disbursement~transaction wire amount",
-                "mandatory closing instructions~closing instructions~title insurance policy requirements~cat 18021971~contact closer~disbursement date~rate lock~wire amount~title file~closing package~settlement agent~closer~original closing documents~alta title insurance",
-                "deed of trust~promissory note~note addendum", 5);
-            Add(L, "ACHAuthorization",
-                "ach authorization~automatic draft payment program~automatic payment authorization",
-                "", "routing number~account number~draft~authorization",
-                "closing disclosure~deed of trust~note", 1);
-            Add(L, "AddressConfidentialityProgram", "address confidentiality program", "",
-                "confidentiality~substitute address~participant", "note~appraisal", 1);
-            Add(L, "AppraisalAcknowledgment", "appraisal acknowledgment~appraisal confidentiality program",
-                "", "appraisal~acknowledgment~valuation", "closing disclosure~deed of trust", 1);
-            Add(L, "AppraisalUpdateCompletion",
-                "appraisal update and or completion~estimate report appraisal valuation~appraisal update",
-                "", "appraised value~completion~inspection~valuation", "note~closing disclosure", 4);
-            Add(L, "AutomatedValuationModelNotice",
-                "automated valuation model notice~customer new freddie bpo appraisal~automated valuation model",
-                "", "avm~valuation model~estimated value", "note~deed of trust", 2);
-            Add(L, "BuydownAgreement",
-                "buydown agreement~buydown end date adjustment worksheet~buydown", "",
-                "buydown~subsidy~temporary rate~adjustment worksheet", "closing disclosure~note", 3);
-            Add(L, "FamilyHousingLoanGuarantee",
-                "family housing loan guarantee~commitment sfh guaranteed loan~sfh guaranteed loan", "",
-                "rural development~guaranteed loan~single family housing", "va loan~fha", 0);
-            Add(L, "ConsumerPrivacyPledge",
-                "consumer privacy pledge~privacy disclosure~privacy policy notice", "",
-                "privacy~nonpublic personal information~opt out", "patriot act~closing disclosure", 2);
-            Add(L, "CustomerIdentificationNotice",
-                "customer identification notice~identification verification usa patriot act information~customer identification",
-                "", "usa patriot act~identity~identification", "patriot act disclosure~privacy pledge", 1);
-            Add(L, "VALoanAnalysis", "va loan analysis~department of veterans affairs loan analysis", "",
-                "veterans affairs~residual income~va~entitlement", "fha~guaranty certificate", 2);
-            Add(L, "GuarantyCertificate",
-                "guaranty certificate~loan guaranty certificate~guaranty certificate 26 1889", "",
-                "guaranty~26 1889~veterans affairs~certificate", "va loan analysis~closing disclosure", 1);
-            Add(L, "DriversLicense", "drivers license~driver s license~personal identification", "",
-                "date of birth~expiration~license~class~dl no", "note~deed of trust", 1);
-            Add(L, "SupplementalConsumerInfo",
-                "supplemental consumer information form~supplemental consumer information", "",
-                "demographic~supplemental~consumer information", "closing disclosure~appraisal", 1);
-            Add(L, "FirstPaymentLetter", "first payment letter", "",
-                "first payment~payment due~monthly payment~remittance", "closing disclosure~escrow", 1);
-            Add(L, "FloodInsuranceIntentToCancel",
-                "flood insurance intent to cancel edi~electronic image generated for edi data~flood insurance intent to cancel",
-                "", "flood~intent to cancel~edi", "flood policy declarations~homeowner", 1);
-            Add(L, "FloodInsuranceCancellation", "flood insurance cancellation letter", "",
-                "flood~cancellation~policy", "flood policy declarations~flood insurance intent", 1);
-            Add(L, "FloodPolicyDeclarations",
-                "flood policy declarations~insurance flood policy declarations flood insurance~flood policy",
-                "", "flood zone~declarations~coverage~premium", "flood insurance cancellation~homeowner", 2);
-            Add(L, "HoldHarmlessAgreement", "hold harmless agreement", "",
-                "hold harmless~indemnify~release", "closing disclosure~note", 1);
-            Add(L, "HomeownerPolicyChange", "homeowner policy change~homeowner s policy change", "",
-                "homeowner~hazard insurance~policy change~endorsement", "flood policy~mortgage insurance", 2);
-            Add(L, "HUDAddendumURLA",
-                "hud addendum to uniform residential~fha va addendum~1004c 70b~hud addendum", "",
-                "uniform residential~addendum~hud~fha va", "hud fha loan underwriting~note", 3);
-            Add(L, "HUDFHALoanUnderwriting",
-                "hud fha loan underwriting and~luts 92900 lt~hud fha loan underwriting", "",
-                "fha~underwriting~92900~mortgage credit analysis", "hud addendum~du underwriting", 0);
-            Add(L, "MortgageInsuranceCertificate",
-                "mortgage insurance certificate~insurance certificate certificate of liability", "",
-                "mortgage insurance~mi certificate~coverage~certificate", "mortgage insurance disclosure~flood policy", 2);
-            Add(L, "MortgageInsuranceDisclosure",
-                "mortgage insurance disclosure~concerning private mortgage insurance", "",
-                "private mortgage insurance~pmi~disclosure~cancellation",
-                "mortgage insurance certificate~notice concerning private mortgage", 2);
-            Add(L, "MortgageInsuranceQuote", "mortgage insurance quote", "",
-                "mortgage insurance~quote~premium rate", "mortgage insurance certificate~mortgage insurance disclosure", 1);
-            Add(L, "NoticeConcerningPrivateMortgage", "notice concerning private mortgage", "",
-                "private mortgage insurance~notice~cancellation rights",
-                "mortgage insurance disclosure~mortgage insurance certificate", 1);
-            Add(L, "NoticeToSettlementAgents", "notice to settlement agents", "",
-                "settlement agent~notice~closing", "closing instructions~closing disclosure", 1);
-            Add(L, "OccupancyAffidavit", "occupancy affidavit", "",
-                "occupancy~primary residence~affidavit~occupy",
-                "occupancy and use certificate~financial status affidavit", 1);
-            Add(L, "OccupancyAndUseCertificate", "occupancy and use certificate", "",
-                "occupancy~use certificate~veterans affairs", "occupancy affidavit~financial status affidavit", 1);
-            Add(L, "FinancialStatusAffidavit", "financial status affidavit~status affidavit", "",
-                "financial status~affidavit~assets~liabilities",
-                "occupancy affidavit~occupancy and use certificate", 2);
-            Add(L, "PatriotActDisclosure", "patriot act disclosure~usa patriot act information disclosure", "",
-                "usa patriot act~disclosure~anti money laundering",
-                "customer identification notice~patriot act information form", 1);
-            Add(L, "PatriotActInformationForm", "patriot act information form~usa patriot act information form", "",
-                "usa patriot act~information form~identity verification",
-                "patriot act disclosure~customer identification notice", 1);
-            Add(L, "PaymentDeferralRepaymentPlan",
-                "payment deferral and repayment plan~payment deferral and repayment plan agreement", "",
-                "deferral~repayment plan~delinquent~modification", "first payment letter~note", 2);
-            return L;
-        }
-
-        private static void Add(List<TypeProfile> L, string name, string strong,
-                                string firstPage, string any, string neg, int maxPages)
-        {
-            L.Add(new TypeProfile
-            {
-                Name = name,
-                StrongStart = Split(strong),
-                FirstPage = Split(firstPage),
-                AnyPage = Split(any),
-                Negative = Split(neg),
-                MaxPages = maxPages,
-            });
-        }
-
-        private static List<string> Split(string s)
-        {
-            var o = new List<string>();
-            if (string.IsNullOrEmpty(s)) return o;
-            foreach (var p in s.Split('~')) if (p.Length > 0) o.Add(p);
-            return o;
+            throw new InvalidOperationException(
+                "ProfilesJson input is required and must contain a valid \"types\" object. " +
+                "Paste the contents of ProfilesJson.sample.json into the ProfilesJson variable.");
         }
     }
 
@@ -838,6 +693,7 @@ namespace MortgageSegmenter
         private static void ApplyConfig(Dictionary<string, object> c, EngineConfig cfg)
         {
             cfg.MinTypeScore = NumOr(c, "min_type_score", cfg.MinTypeScore);
+            cfg.StartTypeMin = NumOr(c, "start_type_min", cfg.StartTypeMin);
             cfg.StartThreshold = NumOr(c, "start_threshold", cfg.StartThreshold);
             cfg.StartLow = NumOr(c, "start_low", cfg.StartLow);
             cfg.SimLow = NumOr(c, "sim_low", cfg.SimLow);
@@ -845,6 +701,7 @@ namespace MortgageSegmenter
             cfg.WStrongStart = NumOr(c, "w_strong_start", cfg.WStrongStart);
             cfg.WTypeChange = NumOr(c, "w_type_change", cfg.WTypeChange);
             cfg.AmbigMargin = NumOr(c, "ambig_margin", cfg.AmbigMargin);
+            object bk; if (c.TryGetValue("break_known_on_lowsim", out bk) && bk is bool) cfg.BreakKnownOnLowSim = (bool)bk;
             object um; if (c.TryGetValue("unknown_mode", out um) && um is string) cfg.UnknownMode = (string)um;
         }
 
