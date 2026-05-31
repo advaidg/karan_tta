@@ -1,0 +1,777 @@
+{
+  "config": {
+    "min_type_score": 44,
+    "start_threshold": 44,
+    "start_low": 25,
+    "sim_low": 0.24,
+    "w_strong_header": 46,
+    "w_strong_start": 48,
+    "w_type_change": 75,
+    "ambig_margin": 22,
+    "unknown_mode": "ContiguousRuns"
+  },
+  "types": {
+    "ACHAuthorization": {
+      "strong_start": [
+        "ach authorization",
+        "automatic draft payment program",
+        "automatic payment authorization"
+      ],
+      "any_page": [
+        "routing number",
+        "account number",
+        "draft",
+        "authorization"
+      ],
+      "negative": [
+        "closing disclosure",
+        "deed of trust",
+        "note"
+      ],
+      "max_pages": 1
+    },
+    "AddendumToNote": {
+      "strong_start": [
+        "addendum to note",
+        "note addendum"
+      ],
+      "any_page": [
+        "addendum",
+        "promissory note",
+        "rider"
+      ],
+      "negative": [
+        "deed of trust",
+        "closing disclosure"
+      ],
+      "max_pages": 0
+    },
+    "AddressConfidentialityProgram": {
+      "strong_start": [
+        "address confidentiality program"
+      ],
+      "any_page": [
+        "confidentiality",
+        "substitute address",
+        "participant"
+      ],
+      "negative": [
+        "note",
+        "appraisal"
+      ],
+      "max_pages": 1
+    },
+    "AppraisalAcknowledgment": {
+      "strong_start": [
+        "appraisal acknowledgment",
+        "appraisal confidentiality program"
+      ],
+      "any_page": [
+        "appraisal",
+        "acknowledgment",
+        "valuation"
+      ],
+      "negative": [
+        "closing disclosure",
+        "deed of trust"
+      ],
+      "max_pages": 1
+    },
+    "AppraisalUpdateCompletion": {
+      "strong_start": [
+        "appraisal update and or completion",
+        "estimate report appraisal valuation",
+        "appraisal update"
+      ],
+      "any_page": [
+        "appraised value",
+        "completion",
+        "inspection",
+        "valuation"
+      ],
+      "negative": [
+        "note",
+        "closing disclosure"
+      ],
+      "max_pages": 4
+    },
+    "AutomatedValuationModelNotice": {
+      "strong_start": [
+        "automated valuation model notice",
+        "customer new freddie bpo appraisal",
+        "automated valuation model"
+      ],
+      "any_page": [
+        "avm",
+        "valuation model",
+        "estimated value"
+      ],
+      "negative": [
+        "note",
+        "deed of trust"
+      ],
+      "max_pages": 2
+    },
+    "BuydownAgreement": {
+      "strong_start": [
+        "buydown agreement",
+        "buydown end date adjustment worksheet",
+        "buydown"
+      ],
+      "any_page": [
+        "buydown",
+        "subsidy",
+        "temporary rate",
+        "adjustment worksheet"
+      ],
+      "negative": [
+        "closing disclosure",
+        "note"
+      ],
+      "max_pages": 3
+    },
+    "ClosingDisclosure": {
+      "strong_start": [
+        "closing disclosure"
+      ],
+      "first_page": [
+        "loan terms",
+        "projected payments",
+        "statement of final loan terms"
+      ],
+      "any_page": [
+        "loan terms",
+        "projected payments",
+        "costs at closing",
+        "cash to close",
+        "loan estimate"
+      ],
+      "negative": [
+        "deed of trust",
+        "promissory note",
+        "purchase order"
+      ],
+      "max_pages": 0
+    },
+    "ClosingInstructions": {
+      "strong_start": [
+        "closing instructions",
+        "instructions specific closing instructions",
+        "specific closing instructions"
+      ],
+      "any_page": [
+        "settlement agent",
+        "disbursement",
+        "closing",
+        "instructions"
+      ],
+      "negative": [
+        "closing disclosure",
+        "deed of trust"
+      ],
+      "max_pages": 3
+    },
+    "FamilyHousingLoanGuarantee": {
+      "strong_start": [
+        "family housing loan guarantee",
+        "commitment sfh guaranteed loan",
+        "sfh guaranteed loan"
+      ],
+      "any_page": [
+        "rural development",
+        "guaranteed loan",
+        "single family housing"
+      ],
+      "negative": [
+        "va loan",
+        "fha"
+      ],
+      "max_pages": 0
+    },
+    "CreditReport": {
+      "strong_start": [
+        "credit report",
+        "summary"
+      ],
+      "first_page": [
+        "merged credit report",
+        "repository equifax experian transunion"
+      ],
+      "any_page": [
+        "fico",
+        "credit score",
+        "tradelines",
+        "inquiries",
+        "equifax",
+        "experian",
+        "transunion"
+      ],
+      "negative": [
+        "credit score disclosure",
+        "appraisal"
+      ],
+      "max_pages": 0
+    },
+    "ConsumerPrivacyPledge": {
+      "strong_start": [
+        "consumer privacy pledge",
+        "privacy disclosure",
+        "privacy policy notice"
+      ],
+      "any_page": [
+        "privacy",
+        "nonpublic personal information",
+        "opt out"
+      ],
+      "negative": [
+        "patriot act",
+        "closing disclosure"
+      ],
+      "max_pages": 2
+    },
+    "CreditScoreDisclosure": {
+      "strong_start": [
+        "credit score disclosure"
+      ],
+      "any_page": [
+        "credit score",
+        "score range",
+        "key factors",
+        "scoring model"
+      ],
+      "negative": [
+        "credit report",
+        "appraisal"
+      ],
+      "max_pages": 1
+    },
+    "CustomerIdentificationNotice": {
+      "strong_start": [
+        "customer identification notice",
+        "identification verification usa patriot act information",
+        "customer identification"
+      ],
+      "any_page": [
+        "usa patriot act",
+        "identity",
+        "identification"
+      ],
+      "negative": [
+        "patriot act disclosure",
+        "privacy pledge"
+      ],
+      "max_pages": 1
+    },
+    "DeedOfTrust": {
+      "strong_start": [
+        "deed of trust",
+        "security instrument",
+        "deed of trust security instrument"
+      ],
+      "first_page": [
+        "this deed of trust is made",
+        "recording requested by",
+        "definitions words used in multiple sections"
+      ],
+      "any_page": [
+        "borrower",
+        "lender",
+        "trustee",
+        "property",
+        "covenants",
+        "recording"
+      ],
+      "negative": [
+        "closing disclosure",
+        "promissory note",
+        "appraisal"
+      ],
+      "max_pages": 0
+    },
+    "VALoanAnalysis": {
+      "strong_start": [
+        "va loan analysis",
+        "department of veterans affairs loan analysis"
+      ],
+      "any_page": [
+        "veterans affairs",
+        "residual income",
+        "va",
+        "entitlement"
+      ],
+      "negative": [
+        "fha",
+        "guaranty certificate"
+      ],
+      "max_pages": 2
+    },
+    "GuarantyCertificate": {
+      "strong_start": [
+        "guaranty certificate",
+        "loan guaranty certificate",
+        "guaranty certificate 26 1889"
+      ],
+      "any_page": [
+        "guaranty",
+        "26 1889",
+        "veterans affairs",
+        "certificate"
+      ],
+      "negative": [
+        "va loan analysis",
+        "closing disclosure"
+      ],
+      "max_pages": 1
+    },
+    "DriversLicense": {
+      "strong_start": [
+        "drivers license",
+        "driver s license",
+        "personal identification"
+      ],
+      "any_page": [
+        "date of birth",
+        "expiration",
+        "license",
+        "class",
+        "dl no"
+      ],
+      "negative": [
+        "note",
+        "deed of trust"
+      ],
+      "max_pages": 1
+    },
+    "DUUnderwritingFindings": {
+      "strong_start": [
+        "du underwriting findings",
+        "du underwriting"
+      ],
+      "first_page": [
+        "recommendation approve eligible",
+        "casefile id"
+      ],
+      "any_page": [
+        "desktop underwriter",
+        "findings",
+        "recommendation",
+        "casefile"
+      ],
+      "negative": [
+        "gus underwriting",
+        "loan product advisor"
+      ],
+      "max_pages": 0
+    },
+    "EscrowAccountDisclosure": {
+      "strong_start": [
+        "escrow account disclosure statement",
+        "escrow account disclosure"
+      ],
+      "first_page": [
+        "escrow account projection for the coming year",
+        "initial escrow statement"
+      ],
+      "any_page": [
+        "escrow",
+        "cushion",
+        "aggregate adjustment",
+        "disbursement"
+      ],
+      "negative": [
+        "closing disclosure",
+        "note"
+      ],
+      "max_pages": 0
+    },
+    "SupplementalConsumerInfo": {
+      "strong_start": [
+        "supplemental consumer information form",
+        "supplemental consumer information"
+      ],
+      "any_page": [
+        "demographic",
+        "supplemental",
+        "consumer information"
+      ],
+      "negative": [
+        "closing disclosure",
+        "appraisal"
+      ],
+      "max_pages": 1
+    },
+    "FirstPaymentLetter": {
+      "strong_start": [
+        "first payment letter"
+      ],
+      "any_page": [
+        "first payment",
+        "payment due",
+        "monthly payment",
+        "remittance"
+      ],
+      "negative": [
+        "closing disclosure",
+        "escrow"
+      ],
+      "max_pages": 1
+    },
+    "FloodInsuranceIntentToCancel": {
+      "strong_start": [
+        "flood insurance intent to cancel edi",
+        "electronic image generated for edi data",
+        "flood insurance intent to cancel"
+      ],
+      "any_page": [
+        "flood",
+        "intent to cancel",
+        "edi"
+      ],
+      "negative": [
+        "flood policy declarations",
+        "homeowner"
+      ],
+      "max_pages": 1
+    },
+    "FloodInsuranceCancellation": {
+      "strong_start": [
+        "flood insurance cancellation letter"
+      ],
+      "any_page": [
+        "flood",
+        "cancellation",
+        "policy"
+      ],
+      "negative": [
+        "flood policy declarations",
+        "flood insurance intent"
+      ],
+      "max_pages": 1
+    },
+    "FloodPolicyDeclarations": {
+      "strong_start": [
+        "flood policy declarations",
+        "insurance flood policy declarations flood insurance",
+        "flood policy"
+      ],
+      "any_page": [
+        "flood zone",
+        "declarations",
+        "coverage",
+        "premium"
+      ],
+      "negative": [
+        "flood insurance cancellation",
+        "homeowner"
+      ],
+      "max_pages": 2
+    },
+    "GUSUnderwritingFindings": {
+      "strong_start": [
+        "gus underwriting findings report",
+        "gus underwriting findings",
+        "gus underwriting"
+      ],
+      "first_page": [
+        "gus recommendation accept",
+        "submission summary"
+      ],
+      "any_page": [
+        "gus",
+        "guaranteed underwriting system",
+        "findings"
+      ],
+      "negative": [
+        "du underwriting",
+        "loan product advisor"
+      ],
+      "max_pages": 0
+    },
+    "HoldHarmlessAgreement": {
+      "strong_start": [
+        "hold harmless agreement"
+      ],
+      "any_page": [
+        "hold harmless",
+        "indemnify",
+        "release"
+      ],
+      "negative": [
+        "closing disclosure",
+        "note"
+      ],
+      "max_pages": 1
+    },
+    "HomeownerPolicyChange": {
+      "strong_start": [
+        "homeowner policy change",
+        "homeowner s policy change"
+      ],
+      "any_page": [
+        "homeowner",
+        "hazard insurance",
+        "policy change",
+        "endorsement"
+      ],
+      "negative": [
+        "flood policy",
+        "mortgage insurance"
+      ],
+      "max_pages": 2
+    },
+    "HUDAddendumURLA": {
+      "strong_start": [
+        "hud addendum to uniform residential",
+        "fha va addendum",
+        "1004c 70b",
+        "hud addendum"
+      ],
+      "any_page": [
+        "uniform residential",
+        "addendum",
+        "hud",
+        "fha va"
+      ],
+      "negative": [
+        "hud fha loan underwriting",
+        "note"
+      ],
+      "max_pages": 3
+    },
+    "HUDFHALoanUnderwriting": {
+      "strong_start": [
+        "hud fha loan underwriting and",
+        "luts 92900 lt",
+        "hud fha loan underwriting"
+      ],
+      "any_page": [
+        "fha",
+        "underwriting",
+        "92900",
+        "mortgage credit analysis"
+      ],
+      "negative": [
+        "hud addendum",
+        "du underwriting"
+      ],
+      "max_pages": 0
+    },
+    "LoanProductAdvisorFeedback": {
+      "strong_start": [
+        "loan product advisor feedback",
+        "loan product advisor full feedback certificate",
+        "lp findings"
+      ],
+      "first_page": [
+        "risk class accept",
+        "loan product advisor evaluation"
+      ],
+      "any_page": [
+        "loan product advisor",
+        "freddie mac",
+        "feedback certificate",
+        "lpa"
+      ],
+      "negative": [
+        "du underwriting",
+        "gus underwriting"
+      ],
+      "max_pages": 0
+    },
+    "MortgageInsuranceCertificate": {
+      "strong_start": [
+        "mortgage insurance certificate",
+        "insurance certificate certificate of liability"
+      ],
+      "any_page": [
+        "mortgage insurance",
+        "mi certificate",
+        "coverage",
+        "certificate"
+      ],
+      "negative": [
+        "mortgage insurance disclosure",
+        "flood policy"
+      ],
+      "max_pages": 2
+    },
+    "MortgageInsuranceDisclosure": {
+      "strong_start": [
+        "mortgage insurance disclosure",
+        "concerning private mortgage insurance"
+      ],
+      "any_page": [
+        "private mortgage insurance",
+        "pmi",
+        "disclosure",
+        "cancellation"
+      ],
+      "negative": [
+        "mortgage insurance certificate",
+        "notice concerning private mortgage"
+      ],
+      "max_pages": 2
+    },
+    "MortgageInsuranceQuote": {
+      "strong_start": [
+        "mortgage insurance quote"
+      ],
+      "any_page": [
+        "mortgage insurance",
+        "quote",
+        "premium rate"
+      ],
+      "negative": [
+        "mortgage insurance certificate",
+        "mortgage insurance disclosure"
+      ],
+      "max_pages": 1
+    },
+    "Note": {
+      "strong_start": [
+        "note",
+        "promissory note"
+      ],
+      "any_page": [
+        "promise to pay",
+        "principal",
+        "interest rate",
+        "maturity",
+        "borrower"
+      ],
+      "negative": [
+        "addendum to note",
+        "deed of trust",
+        "first payment letter"
+      ],
+      "max_pages": 0
+    },
+    "NoticeConcerningPrivateMortgage": {
+      "strong_start": [
+        "notice concerning private mortgage"
+      ],
+      "any_page": [
+        "private mortgage insurance",
+        "notice",
+        "cancellation rights"
+      ],
+      "negative": [
+        "mortgage insurance disclosure",
+        "mortgage insurance certificate"
+      ],
+      "max_pages": 1
+    },
+    "NoticeToSettlementAgents": {
+      "strong_start": [
+        "notice to settlement agents"
+      ],
+      "any_page": [
+        "settlement agent",
+        "notice",
+        "closing"
+      ],
+      "negative": [
+        "closing instructions",
+        "closing disclosure"
+      ],
+      "max_pages": 1
+    },
+    "OccupancyAffidavit": {
+      "strong_start": [
+        "occupancy affidavit"
+      ],
+      "any_page": [
+        "occupancy",
+        "primary residence",
+        "affidavit",
+        "occupy"
+      ],
+      "negative": [
+        "occupancy and use certificate",
+        "financial status affidavit"
+      ],
+      "max_pages": 1
+    },
+    "OccupancyAndUseCertificate": {
+      "strong_start": [
+        "occupancy and use certificate"
+      ],
+      "any_page": [
+        "occupancy",
+        "use certificate",
+        "veterans affairs"
+      ],
+      "negative": [
+        "occupancy affidavit",
+        "financial status affidavit"
+      ],
+      "max_pages": 1
+    },
+    "FinancialStatusAffidavit": {
+      "strong_start": [
+        "financial status affidavit",
+        "status affidavit"
+      ],
+      "any_page": [
+        "financial status",
+        "affidavit",
+        "assets",
+        "liabilities"
+      ],
+      "negative": [
+        "occupancy affidavit",
+        "occupancy and use certificate"
+      ],
+      "max_pages": 2
+    },
+    "PatriotActDisclosure": {
+      "strong_start": [
+        "patriot act disclosure",
+        "usa patriot act information disclosure"
+      ],
+      "any_page": [
+        "usa patriot act",
+        "disclosure",
+        "anti money laundering"
+      ],
+      "negative": [
+        "customer identification notice",
+        "patriot act information form"
+      ],
+      "max_pages": 1
+    },
+    "PatriotActInformationForm": {
+      "strong_start": [
+        "patriot act information form",
+        "usa patriot act information form"
+      ],
+      "any_page": [
+        "usa patriot act",
+        "information form",
+        "identity verification"
+      ],
+      "negative": [
+        "patriot act disclosure",
+        "customer identification notice"
+      ],
+      "max_pages": 1
+    },
+    "PaymentDeferralRepaymentPlan": {
+      "strong_start": [
+        "payment deferral and repayment plan",
+        "payment deferral and repayment plan agreement"
+      ],
+      "any_page": [
+        "deferral",
+        "repayment plan",
+        "delinquent",
+        "modification"
+      ],
+      "negative": [
+        "first payment letter",
+        "note"
+      ],
+      "max_pages": 0
+    }
+  }
+}
