@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Console demo to verify the engine. The engine itself targets netstandard2.0
+       so it also loads inside .NET Framework 4.7.2 (KTA) and .NET Core/5+. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>SegmentationEngineDemo</AssemblyName>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="SegmentationEngine/Models.cs" />
+    <Compile Include="SegmentationEngine/Config.cs" />
+    <Compile Include="SegmentationEngine/OcrUtils.cs" />
+    <Compile Include="SegmentationEngine/PageSplitter.cs" />
+    <Compile Include="SegmentationEngine/ProfilesData.cs" />
+    <Compile Include="SegmentationEngine/Segmenter.cs" />
+    <Compile Include="Demo/Demo.cs" />
+  </ItemGroup>
+
+</Project>
