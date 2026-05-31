@@ -135,21 +135,34 @@
         "closing disclosure"
       ],
       "first_page": [
-        "loan terms",
-        "projected payments",
-        "statement of final loan terms"
+        "this form is a statement of final loan terms",
+        "closing information transaction information",
+        "date issued"
       ],
       "any_page": [
+        "closing disclosure",
+        "gtridcdns",
+        "closing cost details",
+        "loan information",
+        "transaction information",
+        "disbursement date",
+        "settlement agent",
+        "loan id",
+        "sale price",
         "loan terms",
         "projected payments",
-        "costs at closing",
-        "cash to close",
-        "loan estimate"
+        "loan calculations",
+        "loan disclosures",
+        "calculating cash to close",
+        "total loan costs",
+        "origination charges",
+        "escrow account"
       ],
       "negative": [
         "deed of trust",
         "promissory note",
-        "purchase order"
+        "note addendum",
+        "cover sheet and manifest"
       ],
       "max_pages": 0
     },

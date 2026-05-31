@@ -600,9 +600,9 @@ namespace MortgageSegmenter
         {
             var L = new List<TypeProfile>();
             Add(L, "ClosingDisclosure", "closing disclosure",
-                "loan terms~projected payments~statement of final loan terms",
-                "loan terms~projected payments~costs at closing~cash to close~loan estimate",
-                "deed of trust~promissory note~purchase order", 0);
+                "this form is a statement of final loan terms~closing information transaction information~date issued",
+                "closing disclosure~gtridcdns~closing cost details~loan information~transaction information~disbursement date~settlement agent~loan id~sale price~loan terms~projected payments~loan calculations~loan disclosures~calculating cash to close~total loan costs~origination charges~escrow account",
+                "deed of trust~promissory note~note addendum~cover sheet and manifest", 0);
             Add(L, "DeedOfTrust", "deed of trust~security instrument~deed of trust security instrument",
                 "this deed of trust is made~recording requested by~definitions words used in multiple sections",
                 "borrower~lender~trustee~property~covenants~recording",

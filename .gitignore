@@ -19,3 +19,9 @@ Thumbs.db
 # scratch
 /tmp/
 *.log
+
+# Real customer documents (PII) — never commit
+sample_disc/
+*.jpeg
+*.jpg
+*.pdf

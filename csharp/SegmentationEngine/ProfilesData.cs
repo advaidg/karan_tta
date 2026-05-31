@@ -59,9 +59,13 @@ namespace SegmentationEngine
 
             L.Add(P("ClosingDisclosure",
                 S("closing disclosure"),
-                S("loan terms", "projected payments", "statement of final loan terms"),
-                S("loan terms", "projected payments", "costs at closing", "cash to close", "loan estimate"),
-                S("deed of trust", "promissory note", "purchase order")));
+                S("this form is a statement of final loan terms", "closing information transaction information", "date issued"),
+                S("closing disclosure", "gtridcdns", "closing cost details", "loan information",
+                  "transaction information", "disbursement date", "settlement agent", "loan id",
+                  "sale price", "loan terms", "projected payments", "loan calculations",
+                  "loan disclosures", "calculating cash to close", "total loan costs",
+                  "origination charges", "escrow account"),
+                S("deed of trust", "promissory note", "note addendum", "cover sheet and manifest")));
 
             L.Add(P("ClosingInstructions",
                 S("closing instructions", "instructions specific closing instructions", "specific closing instructions"),
