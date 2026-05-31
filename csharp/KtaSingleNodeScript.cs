@@ -244,15 +244,18 @@ namespace MortgageSegmenter
             return " " + low + " ";
         }
 
+        // LINE-INDEPENDENT header zone (mirrors engine.py): first N words of the
+        // page. TTA may deliver a page as multi-line OR one flattened single line;
+        // using the first N words makes both behave identically. ratio/minLines are
+        // kept for signature compatibility but no longer used.
+        public const int HeaderWords = 55;
         public static string Header(string text, double ratio, int minLines)
         {
             if (string.IsNullOrEmpty(text)) return text ?? "";
-            string[] lines = text.Replace("\r\n", "\n").Split('\n');
-            if (lines.Length == 0) return text;
-            int k = Math.Max(minLines, (int)Math.Ceiling(lines.Length * ratio));
-            if (k > lines.Length) k = lines.Length;
+            string[] parts = text.Split(new[] { ' ', '\t', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length <= HeaderWords) return text;
             var sb = new StringBuilder();
-            for (int i = 0; i < k; i++) { if (i > 0) sb.Append('\n'); sb.Append(lines[i]); }
+            for (int i = 0; i < HeaderWords; i++) { if (i > 0) sb.Append(' '); sb.Append(parts[i]); }
             return sb.ToString();
         }
 
