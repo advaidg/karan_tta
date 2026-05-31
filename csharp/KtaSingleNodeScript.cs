@@ -17,8 +17,11 @@
 //                               TTA's [PAGE n] separators. (A document's own body
 //                               may also contain "Page 1" or a stray "[PAGE 1]" —
 //                               both handled.)
-//    "ProfilesJson" (optional) : JSON to OVERRIDE the built-in mortgage profiles,
-//                               so you can tune without recompiling. Schema:
+//    "ProfilesJson" (REQUIRED) : the ONLY source of document profiles. There are
+//                               NO built-in profiles — this script throws if the
+//                               variable is empty/absent. Tune entirely in JSON,
+//                               never in code. Paste ProfilesJson.sample.json here.
+//                               Schema:
 //      {
 //        "config": { "min_type_score": 44, "start_threshold": 44, ... },   // optional
 //        "types": {
@@ -32,7 +35,6 @@
 //          ...
 //        }
 //      }
-//      If "ProfilesJson" is empty/absent, the built-in 43-type set is used.
 //
 //  ---- OUTPUT VARIABLES (sp.OutputVariables) ----------------------------------
 //    "ResultJson"   : PRIMARY output — a single JSON string describing every
@@ -72,14 +74,15 @@ namespace MortgageSegmenter
             // Required input: the entire package OCR (with [PAGE n] separators).
             string ocr = sp.InputVariables["OcrText"].ToString();
 
-            // Optional input: profile/config override JSON. Empty if not supplied.
+            // REQUIRED input: the document profiles (the only source — no built-ins).
+            // Engine.Run throws a clear error downstream if this ends up empty.
             string profilesJson = "";
             try
             {
                 object pj = sp.InputVariables["ProfilesJson"];
                 if (pj != null) profilesJson = pj.ToString();
             }
-            catch { profilesJson = ""; }   // variable not configured -> use built-in
+            catch { profilesJson = ""; }   // variable not configured -> Run() will throw
 
             SegmentationResult r = Engine.Run(ocr, profilesJson);
 
@@ -626,34 +629,43 @@ namespace MortgageSegmenter
     }
 
     // =====================================================================
-    //  PROFILES  (built-in mortgage set + optional JSON override)
-    //  Format per type:  strong | firstpage | anypage | negative | maxpages
-    //  ('~' separates phrases inside a field)
+    //  PROFILES  (JSON-ONLY — no built-in profiles; ProfilesJson is required)
+    //  The entire document-type set lives in the ProfilesJson input variable,
+    //  so it can be tuned without recompiling this script.
     // =====================================================================
     public static class Profiles
     {
         public static List<TypeProfile> Resolve(string profilesJson, out EngineConfig cfg)
         {
             cfg = new EngineConfig();
-            if (!string.IsNullOrEmpty(profilesJson) && profilesJson.Trim().Length > 1)
+            if (string.IsNullOrEmpty(profilesJson) || profilesJson.Trim().Length <= 1)
+                throw new InvalidOperationException(
+                    "ProfilesJson input is required: there are no built-in profiles. " +
+                    "Paste the contents of ProfilesJson.sample.json into the ProfilesJson variable.");
+
+            List<TypeProfile> fromJson;
+            try
             {
-                try
-                {
-                    List<TypeProfile> fromJson = MiniJson.ParseProfiles(profilesJson, cfg);
-                    if (fromJson != null && fromJson.Count > 0) return fromJson;
-                }
-                catch { /* fall back to built-in on any parse error */ }
+                fromJson = MiniJson.ParseProfiles(profilesJson, cfg);
             }
-            throw new InvalidOperationException(
-                "ProfilesJson input is required and must contain a valid \"types\" object. " +
-                "Paste the contents of ProfilesJson.sample.json into the ProfilesJson variable.");
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(
+                    "ProfilesJson could not be parsed: " + ex.Message +
+                    ". It must be valid JSON containing a \"types\" object.", ex);
+            }
+            if (fromJson == null || fromJson.Count == 0)
+                throw new InvalidOperationException(
+                    "ProfilesJson parsed but contained no document types. " +
+                    "It must contain a non-empty \"types\" object.");
+            return fromJson;
         }
     }
 
     // =====================================================================
     //  MINIMAL JSON PARSER  (dependency-free; supports the profile schema only:
     //  objects, arrays of strings, strings, numbers, booleans). Robust enough
-    //  for hand-edited profile JSON; falls back to built-in on any error.
+    //  for hand-edited profile JSON; parse errors surface as a clear exception.
     // =====================================================================
     internal static class MiniJson
     {
