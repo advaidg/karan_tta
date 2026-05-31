@@ -1,13 +1,13 @@
 # ProfilesJson — how to use and edit it
 
-You said you'll **always pass `ProfilesJson`**. Good — that means you can tune the
-splitter forever without touching/recompiling the C# script. This file explains the
-ready-made `ProfilesJson.sample.json` (43 mortgage types from your KTA sheet) and how
-to change it.
+You **always pass `ProfilesJson`** — it is the ONLY source of profiles. That means you
+can tune the splitter forever without touching/recompiling the C# script. This file
+explains the ready-made `ProfilesJson.sample.json` and how to change it.
 
-> The C# node reads the `ProfilesJson` input variable. If it's present and valid,
-> it OVERRIDES the built-in profiles. If it's empty or malformed, the node falls
-> back to its built-in copy (so a bad paste never breaks a run).
+> The C# node reads the `ProfilesJson` input variable. There are **no built-in
+> profiles** — `ProfilesJson` is **required**. If it's empty the node throws a clear
+> error; if the JSON is malformed it throws a parse error naming the problem. (Keep a
+> known-good copy of `ProfilesJson.sample.json` so a bad paste is easy to restore.)
 
 ## Structure
 

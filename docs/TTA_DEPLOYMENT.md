@@ -40,7 +40,7 @@ In your TTA process, create these variables (String unless noted):
 | Variable | Direction | Purpose |
 |---|---|---|
 | `OcrText` | input | the full OCR string with `[PAGE n]` markers (required) |
-| `ProfilesJson` | input | optional JSON to override profiles/thresholds without recompiling. Leave empty to use the built-in 43-type mortgage set. |
+| `ProfilesJson` | input | **required** JSON defining all document profiles/thresholds (the only source — no built-ins). Paste `ProfilesJson.sample.json`. The node throws if empty or malformed. |
 | `SplitPlan` | output | human-readable plan (one row per document) |
 | `SplitIndexes` | output | comma-separated **0-based** page indexes where new docs begin |
 | `SplitTypes` | output | comma-separated doc type per segment |
@@ -83,10 +83,11 @@ In your TTA process, create these variables (String unless noted):
 
 ---
 
-## 4. (Optional) tune live with `ProfilesJson`
+## 4. Tune live with `ProfilesJson` (required input)
 
-You can pass a JSON string into `ProfilesJson` to override the built-in profiles
-and thresholds **without editing the script**. Schema:
+`ProfilesJson` is the ONLY source of profiles — there are no built-ins. You pass the
+JSON string defining all types and thresholds, and you can re-tune **without editing
+the script**. Schema:
 
 ```json
 {
@@ -126,8 +127,9 @@ Field meaning (this is the heart of accuracy):
   a small number for short forms; `0` = unbounded (Note, Deed of Trust, etc.).
   A same-type page beyond the cap starts a new document.
 
-If `ProfilesJson` is empty or malformed, the node silently falls back to the
-built-in set (so a bad paste never breaks the run).
+`ProfilesJson` is required: if it's empty or malformed the node throws a clear error
+(rather than silently mis-splitting). Keep a known-good `ProfilesJson.sample.json` on
+hand so a bad paste is easy to restore.
 
 ---
 
