@@ -33,6 +33,7 @@ class Segmenter:
                 "negative": [ou.normalize(k) for k in prof.get("negative", [])],
                 "id_regex": ou.compile_list(prof.get("id_regex", [])),
                 "max_pages": int(prof.get("max_pages", 0)),
+                "require_first_page": bool(prof.get("require_first_page", False)),
             }
         self.generic_id_regex = ou.compile_list(self.profiles.get("generic_id_regex", []))
 
@@ -189,10 +190,17 @@ class Segmenter:
         type_change_evidenced = (type_changed and (confident_type or hard_page_cue)
                                  and (strong_new or page_one or reset or low_sim))
 
-        # known -> unknown is a boundary ONLY when the page is genuinely different
-        # content (low similarity).
+        # known -> unknown is a boundary when the page is genuinely different content
+        # (low similarity) OR when the page actively CONTRADICTS the open document's
+        # type (its score for the open type went negative because that type's
+        # negative keywords fired). A page that scores < 0 for the open type clearly
+        # does not belong to it (e.g. a PUD/Condo Rider following a Deed of Trust:
+        # shares the legal vocabulary but its rider-specific negatives push the
+        # Deed-of-Trust score below zero) -> start a new (Unknown) document.
+        open_type_score = dec.type_scores.get(seg_type, 0.0) if seg_type else 0.0
+        contradicts_open = dec.is_unknown and open_type_score < 0.0
         known_to_unknown = (seg_type is not None and seg_type != "Unknown"
-                            and dec.is_unknown and low_sim)
+                            and dec.is_unknown and (low_sim or contradicts_open))
 
         # same-type new instance via page-1 signature (no page number needed)
         same_type_new_instance = same_type and not dec.is_unknown and first_page_signature

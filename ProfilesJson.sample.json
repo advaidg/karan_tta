@@ -1,6 +1,7 @@
 {
   "config": {
     "min_type_score": 44,
+    "start_type_min": 76,
     "start_threshold": 44,
     "start_low": 25,
     "sim_low": 0.24,
@@ -8,8 +9,7 @@
     "w_strong_start": 48,
     "w_type_change": 75,
     "ambig_margin": 22,
-    "unknown_mode": "ContiguousRuns",
-    "start_type_min": 76
+    "unknown_mode": "ContiguousRuns"
   },
   "generic_id_regex": [],
   "types": {
@@ -77,21 +77,27 @@
         "wire amount",
         "secondary contact",
         "title file",
-        "parties and subject property",
-        "buyers",
-        "sellers",
-        "subject property",
-        "closing date",
         "buyer and seller",
         "acknowledgment",
         "hoa dues",
-        "seller's disclosure",
+        "seller s disclosure",
         "old republic national title",
         "earnest money",
         "proration",
         "roles and acknowledgments",
         "furnish and sign required documents",
-        "limited indemnity"
+        "limited indemnity",
+        "buyer and seller roles",
+        "approval of sale",
+        "agreement to furnish",
+        "acknowledgment of review",
+        "legal description of subject property",
+        "subject property",
+        "old republic national title insurance company",
+        "parties and subject property",
+        "buyers",
+        "sellers",
+        "closing date"
       ],
       "negative": [
         "deed of trust",
@@ -135,16 +141,19 @@
         "uniform residential loan application",
         "first payment letter",
         "planned unit development rider",
-        "pud rider",
-        "post closing instructions",
-        "tax proration",
-        "escrow closing instructions",
         "this planned unit development rider",
         "condominium rider",
-        "this condominium rider",
         "1-4 family rider",
-        "this rider is made",
-        "is incorporated into and amends"
+        "is incorporated into and amends",
+        "supplements the mortgage",
+        "security deed",
+        "master or blanket policy",
+        "in lieu of restoration",
+        "property insurance proceeds",
+        "rider is made this",
+        "post closing instructions",
+        "tax proration",
+        "escrow closing instructions"
       ],
       "max_pages": 0
     },
@@ -295,6 +304,7 @@
         "hgt",
         "wgt",
         "eyes",
+        "drwerlicense",
         "drwer license",
         "ldl",
         "operator license"

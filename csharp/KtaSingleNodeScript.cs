@@ -80,10 +80,10 @@ namespace MortgageSegmenter
 
             SegmentationResult r = Engine.Run(ocr, profilesJson);
 
-            sp.OutputVariables["SplitPlan"] = r.Plan;
-            sp.OutputVariables["SplitIndexes"] = r.SplitIndexes;
-            sp.OutputVariables["SplitTypes"] = r.SplitTypes;
-            sp.OutputVariables["ReviewFlags"] = r.ReviewFlags;
+            // PRIMARY output: a single clean JSON string describing every document.
+            sp.OutputVariables["ResultJson"] = r.Json;
+            // Convenience scalars (still handy for simple downstream mapping):
+            sp.OutputVariables["SplitIndexes"] = r.SplitIndexes;   // 0-based, comma-separated
             sp.OutputVariables["DocCount"] = r.DocCount.ToString(CultureInfo.InvariantCulture);
         }
     }
@@ -93,10 +93,8 @@ namespace MortgageSegmenter
     // =====================================================================
     public sealed class SegmentationResult
     {
-        public string Plan = "";
-        public string SplitIndexes = "";
-        public string SplitTypes = "";
-        public string ReviewFlags = "";
+        public string Json = "";          // primary: full JSON document array
+        public string SplitIndexes = "";  // 0-based comma-separated start indexes
         public int DocCount = 0;
     }
 
@@ -114,35 +112,71 @@ namespace MortgageSegmenter
             List<string> pages;
             List<DocumentSegment> segments = seg.SegmentOcr(ocrText, out pages);
 
-            var plan = new StringBuilder();
+            // ---- build the JSON result ----
+            // {
+            //   "docCount": 24, "pageCount": 127,
+            //   "documents": [
+            //     { "index":1, "startPage":1, "endPage":1, "pageCount":1,
+            //       "type":"ClosingDisclosure", "confidence":0.92,
+            //       "needsReview":true, "splitIndex":0, "reason":"..." }, ...
+            //   ],
+            //   "splitIndexes": [6,11,12]      // 0-based; feed to SplitDocumentAndClassify
+            // }
+            var json = new StringBuilder();
             var idx = new StringBuilder();
-            var types = new StringBuilder();
-            var flags = new StringBuilder();
+            json.Append("{\"docCount\":").Append(segments.Count)
+                .Append(",\"pageCount\":").Append(pages.Count)
+                .Append(",\"documents\":[");
             for (int i = 0; i < segments.Count; i++)
             {
                 DocumentSegment s = segments[i];
-                if (i > 0) { plan.Append(" ; "); types.Append(','); flags.Append(','); }
-                plan.Append(s.StartPage + 1).Append('|').Append(s.EndPage + 1).Append('|')
-                    .Append(s.DocType).Append('|')
-                    .Append(s.Confidence.ToString("0.00", CultureInfo.InvariantCulture)).Append('|')
-                    .Append(s.NeedsReview ? "REVIEW" : "OK").Append('|')
-                    .Append(s.Reason);
-                types.Append(s.DocType);
-                flags.Append(s.NeedsReview ? "1" : "0");
+                if (i > 0) json.Append(',');
+                json.Append("{\"index\":").Append(i + 1)
+                    .Append(",\"startPage\":").Append(s.StartPage + 1)        // 1-based (human)
+                    .Append(",\"endPage\":").Append(s.EndPage + 1)
+                    .Append(",\"pageCount\":").Append(s.PageCount)
+                    .Append(",\"type\":\"").Append(JsonEsc(s.DocType)).Append('"')
+                    .Append(",\"confidence\":").Append(s.Confidence.ToString("0.00", CultureInfo.InvariantCulture))
+                    .Append(",\"needsReview\":").Append(s.NeedsReview ? "true" : "false")
+                    .Append(",\"splitIndex\":").Append(s.StartPage)           // 0-based (SDK)
+                    .Append(",\"reason\":\"").Append(JsonEsc(s.Reason)).Append("\"}");
                 if (s.StartPage > 0)
                 {
                     if (idx.Length > 0) idx.Append(',');
-                    idx.Append(s.StartPage.ToString(CultureInfo.InvariantCulture)); // 0-based
+                    idx.Append(s.StartPage.ToString(CultureInfo.InvariantCulture));
                 }
             }
+            json.Append("],\"splitIndexes\":[").Append(idx).Append("]}");
+
             return new SegmentationResult
             {
-                Plan = plan.ToString(),
+                Json = json.ToString(),
                 SplitIndexes = idx.ToString(),
-                SplitTypes = types.ToString(),
-                ReviewFlags = flags.ToString(),
                 DocCount = segments.Count,
             };
+        }
+
+        // minimal JSON string escaper (quotes, backslash, control chars)
+        private static string JsonEsc(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return "";
+            var sb = new StringBuilder(s.Length + 8);
+            foreach (char c in s)
+            {
+                switch (c)
+                {
+                    case '"': sb.Append("\\\""); break;
+                    case '\\': sb.Append("\\\\"); break;
+                    case '\n': sb.Append("\\n"); break;
+                    case '\r': sb.Append("\\r"); break;
+                    case '\t': sb.Append("\\t"); break;
+                    default:
+                        if (c < ' ') sb.Append("\\u").Append(((int)c).ToString("x4"));
+                        else sb.Append(c);
+                        break;
+                }
+            }
+            return sb.ToString();
         }
     }
 

@@ -22,6 +22,19 @@ Thumbs.db
 
 # Real customer documents (PII) — never commit
 sample_disc/
+sm_cl_inst/
 *.jpeg
 *.jpg
+*.heic
 *.pdf
+# Real OCR samples & ground truth (PII) — never commit
+actual_sample.txt
+actual_Sample.txt
+expected.txt
+expected_output.txt
+profiles_9.json
+# scratch outputs
+dbg*.txt
+diag*.txt
+types_now.txt
+zz_*.txt
