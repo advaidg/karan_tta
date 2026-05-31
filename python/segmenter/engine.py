@@ -100,6 +100,7 @@ class Segmenter:
         dec._best_minus_second = best_score - second_score              # type: ignore[attr-defined]
         dec._norm_tokens = ou.tokenize(norm_full)                       # type: ignore[attr-defined]
         dec._first_page_sig = first_page_sig                            # type: ignore[attr-defined]
+        dec._best_score = best_score                                    # type: ignore[attr-defined]
         return dec
 
     # ------------------------------------------------------------ start decision
@@ -162,9 +163,31 @@ class Segmenter:
         id_change = bool(same_type and not dec.is_unknown and seg_ids and dec.extracted_ids
                          and not (set(dec.extracted_ids) & set(seg_ids)))
 
-        # type change is real evidence only when corroborated: a NEW title,
-        # a fresh page-1, a reset, or genuinely different content (low similarity).
-        type_change_evidenced = type_changed and (strong_new or page_one or reset or low_sim)
+        # CONFIDENT-TYPE gate: continuation pages of a multi-page document often
+        # mention ANOTHER type's keyword/title once (e.g. a Closing Instructions
+        # page that says "Closing Disclosure", "security instrument", or lists a
+        # "Deed of Trust" in its enclosures). That scores the other type just over
+        # the Unknown floor and would wrongly start a new document. So a TYPE-CHANGE
+        # only starts a new doc when the new type is CONFIDENT (scores clearly above
+        # the floor) OR there is a hard page-1 cue (first-page signature / reset /
+        # "page 1" / previous page terminal). Otherwise the page stays with the open
+        # document. Real new documents almost always clear this easily.
+        best_score = float(getattr(dec, "_best_score", 0.0))
+        start_type_min = cfg.get("start_type_min", cfg["min_type_score"] * 1.5)
+        confident_type = best_score >= start_type_min
+        hard_page_cue = first_page_signature or reset or page_one or prev_terminal
+        # single-page types and over-cap are deterministic boundary signals (a
+        # one-page form, or a same-type page past its cap) — exempt them from the
+        # confident-type gate so short docs (e.g. an OCR-mangled Driver License)
+        # still start a new document.
+        if type_changed and not (confident_type or hard_page_cue
+                                 or single_page_type or over_cap):
+            strong_new = False
+
+        # type change is real evidence only when corroborated AND (confident type or
+        # a hard page cue). low_sim alone is not enough for an unconfident type.
+        type_change_evidenced = (type_changed and (confident_type or hard_page_cue)
+                                 and (strong_new or page_one or reset or low_sim))
 
         # known -> unknown is a boundary ONLY when the page is genuinely different
         # content (low similarity).

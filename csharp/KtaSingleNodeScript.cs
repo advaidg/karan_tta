@@ -154,6 +154,7 @@ namespace MortgageSegmenter
         public double HeaderRatio = 0.34; public int HeaderMinLines = 3;
         public double WStrongHeader = 46.0, WStrongBody = 8.0, WAny = 12.0, WNegative = -30.0;
         public double MinTypeScore = 44.0, TypeConfDenom = 70.0, AmbigMargin = 22.0;
+        public double StartTypeMin = 76.0;   // type-change needs new type score >= this (or page cue)
         public double WTypeChange = 75.0, WStrongStart = 48.0;
         public double WPagenumOne = 45.0, WReset = 50.0, WPrevTerminal = 25.0, WLowSim = 25.0;
         public double WContPagenum = 40.0, WContTitle = 18.0;
@@ -182,7 +183,7 @@ namespace MortgageSegmenter
         public int HasPageNum; public int PageNumber; public int HasTotal; public int TotalPages;
         public List<string> Signals = new List<string>();
         public bool StrongInHeader; public bool FirstPageSig;
-        public double BestMinusSecond; public List<string> NormTokens = new List<string>();
+        public double BestMinusSecond; public double BestScore; public List<string> NormTokens = new List<string>();
         public int MaxPages;
     }
 
@@ -428,6 +429,7 @@ namespace MortgageSegmenter
                 StrongInHeader = bestStrongHeader,
                 FirstPageSig = fpSig,
                 BestMinusSecond = best - second,
+                BestScore = best,
                 NormTokens = Ocr.Tokenize(nf),
                 MaxPages = maxPages,
             };

@@ -31,6 +31,9 @@ DEFAULT_CONFIG: Dict[str, float] = {
     "min_type_score": 44.0,      # best type score below this => page is "Unknown"
                                  # (tuned P5: one strong header (35) alone is NOT enough;
                                  #  needs corroboration -> kills single-word false positives)
+    "start_type_min": 66.0,      # a TYPE-CHANGE only starts a new doc if the new type
+                                 # scores >= this (clearly that type, not an incidental
+                                 # keyword on a continuation page) OR has a page-1 cue
     "type_conf_denom": 70.0,     # divisor mapping raw score -> 0..1 confidence
     "ambig_margin": 22.0,        # best-minus-second below this => ambiguous (review) (tuned P6)
 

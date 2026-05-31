@@ -18,6 +18,7 @@ namespace SegmentationEngine
         public double WAny = 12.0;
         public double WNegative = -30.0;
         public double MinTypeScore = 44.0;    // tuned P5
+        public double StartTypeMin = 76.0;    // type-change needs new type score >= this (or page cue)
         public double TypeConfDenom = 70.0;
         public double AmbigMargin = 22.0;     // tuned P6
 
