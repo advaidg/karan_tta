@@ -298,9 +298,12 @@ namespace MortgageSegmenter
     // =====================================================================
     public static class PageSplitter
     {
+        // Matches [PAGE n] ALONE on a line OR INLINE. Real TTA output flattens
+        // newlines ("[PAGE 1] text... [PAGE 2] text..."), so the marker must match
+        // mid-line. The monotonic-sequence Filter() guards the in-body trap.
         public static readonly Regex Marker = new Regex(
-            @"^[\s>*]*[\[\(<]\s*page\s+(\d{1,4})\s*[\]\)>]\s*$",
-            RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+            @"[\[\(<]\s*page\s+(\d{1,4})\s*[\]\)>]",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public static List<string> Split(string ocr)
         {

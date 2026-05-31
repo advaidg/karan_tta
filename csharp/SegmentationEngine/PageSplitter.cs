@@ -15,10 +15,12 @@ namespace SegmentationEngine
     /// </summary>
     public static class PageSplitter
     {
-        // Bracketed PAGE marker alone on a line. Adjust to your exact TTA format.
+        // Bracketed PAGE marker — matches ALONE on a line OR INLINE. Real TTA output
+        // flattens newlines ("[PAGE 1] text... [PAGE 2] text..."), so the marker must
+        // match mid-line. The monotonic-sequence FilterSequence() guards the in-body trap.
         public static readonly Regex DefaultMarker = new Regex(
-            @"^[\s>*]*[\[\(<]\s*page\s+(\d{1,4})\s*[\]\)>]\s*$",
-            RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+            @"[\[\(<]\s*page\s+(\d{1,4})\s*[\]\)>]",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public static List<string> SplitPages(string ocrText)
         {

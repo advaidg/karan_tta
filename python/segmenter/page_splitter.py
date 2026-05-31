@@ -22,9 +22,12 @@ from __future__ import annotations
 import re
 from typing import List, Optional
 
-# Default: a bracketed PAGE marker alone on a line. Tolerates [PAGE 1], [ Page 12 ],
-# and common OCR bracket noise. Adjust to your TTA output if it differs.
-DEFAULT_MARKER = re.compile(r"(?im)^[\s>*]*[\[\(<]\s*page\s+(\d{1,4})\s*[\]\)>]\s*$")
+# Default: a bracketed PAGE marker that may appear ALONE on a line OR INLINE.
+# Real TTA output flattens newlines, so "[PAGE 1] text... [PAGE 2] text..." is
+# common — the marker must match mid-line too. The monotonic-sequence filter in
+# _filter_sequence() is what guards against a stray in-body "[PAGE 1]" (the trap).
+# Tolerates [PAGE 1], ( Page 12 ), <page 3>, and common OCR bracket noise.
+DEFAULT_MARKER = re.compile(r"(?i)[\[\(<]\s*page\s+(\d{1,4})\s*[\]\)>]")
 
 
 def split_pages(ocr_text: str, marker: re.Pattern = DEFAULT_MARKER,
