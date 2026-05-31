@@ -25,14 +25,23 @@ def normalize(text: str) -> str:
     return " " + low + " "
 
 
-def header_text(text: str, ratio: float, min_lines: int) -> str:
-    """Return the top portion of a page (the 'header zone')."""
-    lines = [ln for ln in text.splitlines()]
-    if not lines:
+def header_text(text: str, ratio: float, min_lines: int,
+                header_words: int = 55) -> str:
+    """Return the 'header zone' (the start of the page) — LINE-INDEPENDENT.
+
+    TTA may deliver a page as normal multi-line text OR as one long flattened line
+    with no newlines. To make both behave identically, the header zone is defined
+    as the first `header_words` whitespace-delimited tokens of the page (not the
+    first N lines). This way single-line and multi-line OCR of the same page yield
+    the same header and therefore the same classification. (ratio / min_lines are
+    accepted for backward compatibility but no longer used.)
+    """
+    if not text:
         return text
-    k = max(int(min_lines), math.ceil(len(lines) * ratio))
-    k = min(k, len(lines))
-    return "\n".join(lines[:k])
+    parts = text.split()
+    if len(parts) <= header_words:
+        return text
+    return " ".join(parts[:header_words])
 
 
 def contains_phrase(normalized_haystack: str, normalized_phrase: str) -> bool:
