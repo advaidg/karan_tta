@@ -602,7 +602,7 @@ namespace MortgageSegmenter
             Add(L, "ClosingDisclosure", "closing disclosure",
                 "this form is a statement of final loan terms~closing information transaction information~date issued",
                 "closing disclosure~gtridcdns~closing cost details~loan information~transaction information~disbursement date~settlement agent~loan id~sale price~loan terms~projected payments~loan calculations~loan disclosures~calculating cash to close~total loan costs~origination charges~escrow account",
-                "deed of trust~promissory note~note addendum~cover sheet and manifest", 0);
+                "deed of trust~promissory note~note addendum~cover sheet and manifest~mandatory closing instructions", 0);
             Add(L, "DeedOfTrust", "deed of trust~security instrument~deed of trust security instrument",
                 "this deed of trust is made~recording requested by~definitions words used in multiple sections",
                 "borrower~lender~trustee~property~covenants~recording",
@@ -636,8 +636,10 @@ namespace MortgageSegmenter
                 "escrow account projection for the coming year~initial escrow statement",
                 "escrow~cushion~aggregate adjustment~disbursement", "closing disclosure~note", 0);
             Add(L, "ClosingInstructions",
-                "closing instructions~instructions specific closing instructions~specific closing instructions",
-                "", "settlement agent~disbursement~closing~instructions", "closing disclosure~deed of trust", 3);
+                "mandatory closing instructions~closing instructions",
+                "closing disclosure must be delivered by~rate lock expiration date~these closing instructions are delivered to you~within 24 hours of disbursement~transaction wire amount",
+                "mandatory closing instructions~closing instructions~title insurance policy requirements~cat 18021971~contact closer~disbursement date~rate lock~wire amount~title file~closing package~settlement agent~closer~original closing documents~alta title insurance",
+                "deed of trust~promissory note~note addendum", 5);
             Add(L, "ACHAuthorization",
                 "ach authorization~automatic draft payment program~automatic payment authorization",
                 "", "routing number~account number~draft~authorization",

@@ -162,27 +162,45 @@
         "deed of trust",
         "promissory note",
         "note addendum",
-        "cover sheet and manifest"
+        "cover sheet and manifest",
+        "mandatory closing instructions"
       ],
       "max_pages": 0
     },
     "ClosingInstructions": {
       "strong_start": [
-        "closing instructions",
-        "instructions specific closing instructions",
-        "specific closing instructions"
+        "mandatory closing instructions",
+        "closing instructions"
+      ],
+      "first_page": [
+        "closing disclosure must be delivered by",
+        "rate lock expiration date",
+        "these closing instructions are delivered to you",
+        "within 24 hours of disbursement",
+        "transaction wire amount"
       ],
       "any_page": [
+        "mandatory closing instructions",
+        "closing instructions",
+        "title insurance policy requirements",
+        "cat 18021971",
+        "contact closer",
+        "disbursement date",
+        "rate lock",
+        "wire amount",
+        "title file",
+        "closing package",
         "settlement agent",
-        "disbursement",
-        "closing",
-        "instructions"
+        "closer",
+        "original closing documents",
+        "alta title insurance"
       ],
       "negative": [
-        "closing disclosure",
-        "deed of trust"
+        "deed of trust",
+        "promissory note",
+        "note addendum"
       ],
-      "max_pages": 3
+      "max_pages": 5
     },
     "FamilyHousingLoanGuarantee": {
       "strong_start": [

@@ -65,12 +65,18 @@ namespace SegmentationEngine
                   "sale price", "loan terms", "projected payments", "loan calculations",
                   "loan disclosures", "calculating cash to close", "total loan costs",
                   "origination charges", "escrow account"),
-                S("deed of trust", "promissory note", "note addendum", "cover sheet and manifest")));
+                S("deed of trust", "promissory note", "note addendum", "cover sheet and manifest", "mandatory closing instructions")));
 
             L.Add(P("ClosingInstructions",
-                S("closing instructions", "instructions specific closing instructions", "specific closing instructions"),
-                null, S("settlement agent", "disbursement", "closing", "instructions"),
-                S("closing disclosure", "deed of trust")));
+                S("mandatory closing instructions", "closing instructions"),
+                S("closing disclosure must be delivered by", "rate lock expiration date",
+                  "these closing instructions are delivered to you", "within 24 hours of disbursement",
+                  "transaction wire amount"),
+                S("mandatory closing instructions", "closing instructions", "title insurance policy requirements",
+                  "cat 18021971", "contact closer", "disbursement date", "rate lock", "wire amount",
+                  "title file", "closing package", "settlement agent", "closer",
+                  "original closing documents", "alta title insurance"),
+                S("deed of trust", "promissory note", "note addendum")));
 
             L.Add(P("FamilyHousingLoanGuarantee",
                 S("family housing loan guarantee", "commitment sfh guaranteed loan", "sfh guaranteed loan"),
